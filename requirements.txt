@@ -1,7 +1,9 @@
 fastapi==0.95.0
 uvicorn==0.21.1
 matplotlib==3.7.1
-pandas==1.5.3
-numpy==1.24.3  # Явно указываем совместимую версию
+pandas==2.0.3
+numpy==1.24.3
 psycopg2-binary==2.9.6
 python-multipart==0.0.6
+mplfinance==0.12.9b7
+python-dateutil==2.8.2
