@@ -58,15 +58,25 @@ jobs:
           POSTGRES_USER=$POSTGRES_USER
           POSTGRES_PASSWORD=$POSTGRES_PASSWORD
           POSTGRES_DB=$POSTGRES_DB
-          DB_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5433/$POSTGRES_DB
+          DB_URL=postgresql://$POSTGRES_USER:$POSTGRES_PASSWORD@postgres:5432/$POSTGRES_DB
           EOL
+
+          # Сначала создаем папку и клонируем репозиторий (если нужно)
+          ssh $SERVER_USER@$SERVER_IP "
+            mkdir -p ~/portfolio-visualizer
+            if [ ! -d ~/portfolio-visualizer/.git ]; then
+              git clone https://github.com/Dema-koder/portfolio-visualizer.git ~/portfolio-visualizer
+            fi
+          "
 
           # Копируем .env на сервер
           scp .env $SERVER_USER@$SERVER_IP:~/portfolio-visualizer/.env
-          
-          # Выполняем команды на сервере
-          ssh $SERVER_USER@$SERVER_IP << 'EOF'
-            # Установка Docker и Docker Compose (если нужно)
+
+          # Выполняем остальные команды
+          ssh $SERVER_USER@$SERVER_IP "
+            cd ~/portfolio-visualizer
+            git pull origin main
+
             if ! command -v docker &> /dev/null; then
               sudo apt-get update
               sudo apt-get install -y docker.io
@@ -75,23 +85,12 @@ jobs:
             fi
 
             if ! command -v docker-compose &> /dev/null; then
-              sudo curl -L "https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+              sudo curl -L \"https://github.com/docker/compose/releases/download/v2.23.0/docker-compose-$(uname -s)-$(uname -m)\" -o /usr/local/bin/docker-compose
               sudo chmod +x /usr/local/bin/docker-compose
             fi
 
-            # Работа с репозиторием
-            if [ -d "portfolio-visualizer" ]; then
-              cd portfolio-visualizer
-              git pull origin main
-            else
-              git clone https://github.com/Dema-koder/portfolio-visualizer.git
-              cd portfolio-visualizer
-            fi
-
-            # Запуск сервисов
             sudo docker-compose down || true
             sudo docker-compose up -d --build
-          EOF
-          
-          # Удаляем временный .env
+          "
+
           rm -f .env
