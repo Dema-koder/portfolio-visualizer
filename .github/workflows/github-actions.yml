@@ -85,12 +85,7 @@ jobs:
             docker build -t portfolio-visualizer .
             docker stop portfolio-visualizer || true
             docker rm portfolio-visualizer || true
-            docker run -d \
-              --name portfolio-visualizer \
-              --restart unless-stopped \
-              -p 8000:8000 \
-              --env-file .env \
-              portfolio-visualizer
+            docker run -p 8000:8000 -e DB_URL=postgresql://app_user:secretpass@host.docker.internal:5433/app_db portfolio-visualizer
           EOF
 
           rm -f .env
