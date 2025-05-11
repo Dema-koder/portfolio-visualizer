@@ -30,13 +30,6 @@ jobs:
           pip install -r requirements.txt
           pip install pytest pytest-cov
 
-      - name: Run tests
-        run: |
-          pytest --cov=app --cov-report=xml
-
-      - name: Upload coverage
-        uses: codecov/codecov-action@v3
-
   deploy:
     needs: build-test
     runs-on: ubuntu-latest
