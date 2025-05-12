@@ -22,4 +22,7 @@ class Database:
 
         df = pd.DataFrame(data, columns=['time', 'value'])
         df['time'] = pd.to_datetime(df['time'])
+
+        df['time'] = df['time'] + pd.Timedelta(hours=3)
+
         return df
