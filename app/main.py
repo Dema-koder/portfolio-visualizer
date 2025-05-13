@@ -10,17 +10,23 @@ db = Database(os.getenv("DB_URL", "postgresql://app_user:secretpass@localhost:54
 @app.get("/plot", response_class=HTMLResponse)
 async def get_plot(period: str = "month"):
     periods = {
-        "day": ("Дневной график", 1),
-        "week": ("Недельный график", 7),
-        "month": ("Месячный график", 30),
-        "year": ("Годовой график", 365)
+        "15min": ("График за 15 минут", None, 15),
+        "30min": ("График за 30 минут", None, 30),
+        "1h": ("График за 1 час", None, 60),
+        "3h": ("График за 3 часа", None, 180),
+        "6h": ("График за 6 часов", None, 360),
+        "12h": ("График за 12 часов", None, 720),
+        "day": ("Дневной график", 1, None),
+        "week": ("Недельный график", 7, None),
+        "month": ("Месячный график", 30, None),
+        "year": ("Годовой график", 365, None)
     }
 
     if period not in periods:
         raise HTTPException(status_code=400, detail="Invalid period")
 
-    title, days = periods[period]
-    df = db.get_portfolio_data(days)
+    title, days, minutes = periods[period]
+    df = db.get_portfolio_data(period_minutes=minutes, period_days=days)
 
     if df.empty:
         raise HTTPException(status_code=404, detail="No data available")

@@ -7,14 +7,20 @@ class Database:
     def __init__(self, db_url):
         self.conn = psycopg2.connect(db_url)
 
-    def get_portfolio_data(self, period_days: int = 30):
+    def get_portfolio_data(self, period_minutes: int = None, period_days: int = None):
         query = sql.SQL("""
             SELECT time, value 
             FROM stoncks 
             WHERE time >= %s
             ORDER BY time
         """)
-        date_from = datetime.now() - timedelta(days=period_days)
+
+        if period_minutes is not None:
+            date_from = datetime.now() - timedelta(minutes=period_minutes)
+        elif period_days is not None:
+            date_from = datetime.now() - timedelta(days=period_days)
+        else:
+            date_from = datetime.now() - timedelta(days=30)
 
         with self.conn.cursor() as cursor:
             cursor.execute(query, (date_from,))
